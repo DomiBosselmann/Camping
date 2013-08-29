@@ -1,9 +1,9 @@
-package Entities;
+package entities;
 
 public class Equipment {
 
 	private long id;
-	private String kind;
+	private Equipment_Kind kind;
 	private int numberTents;
 	private int numberVehicles;
 	private int sizeTents;
@@ -12,11 +12,11 @@ public class Equipment {
 		super();
 	}
 
-	public String getKind() {
+	public Equipment_Kind getKind() {
 		return kind;
 	}
 
-	public void setKind(String kind) {
+	public void setKind(Equipment_Kind kind) {
 		this.kind = kind;
 	}
 

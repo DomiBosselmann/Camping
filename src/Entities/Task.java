@@ -1,32 +1,36 @@
-package Entities;
+package entities;
 
-import java.util.Date;
+import org.joda.time.LocalDate;
+
+
 
 public class Task {
 
-	private Date startDate;
-	private Date finishDate;
+	private long id;
+	private LocalDate startDate;
+	private LocalDate finishDate;
 	private String desc;
-	private String prio;
-	private String status;
+	private Task_Prio prio;
+	private Task_Status status;
+	private Property property;
 
 	public Task() {
 		super();
 	}
 
-	public Date getStartDate() {
+	public LocalDate getStartDate() {
 		return startDate;
 	}
 
-	public void setStartDate(Date startDate) {
+	public void setStartDate(LocalDate startDate) {
 		this.startDate = startDate;
 	}
 
-	public Date getFinishDate() {
+	public LocalDate getFinishDate() {
 		return finishDate;
 	}
 
-	public void setFinishDate(Date finishDate) {
+	public void setFinishDate(LocalDate finishDate) {
 		this.finishDate = finishDate;
 	}
 
@@ -38,20 +42,30 @@ public class Task {
 		this.desc = desc;
 	}
 
-	public String getPrio() {
+	public Task_Prio getPrio() {
 		return prio;
 	}
 
-	public void setPrio(String prio) {
+	public void setPrio(Task_Prio prio) {
 		this.prio = prio;
 	}
 
-	public String getStatus() {
+	public Task_Status getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(Task_Status status) {
 		this.status = status;
 	}
+
+	public Property getProperty() {
+		return property;
+	}
+
+	public void setProperty(Property property) {
+		this.property = property;
+	}
+	
+	
 
 }

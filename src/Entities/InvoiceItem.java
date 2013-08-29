@@ -1,4 +1,4 @@
-package Entities;
+package entities;
 
 public class InvoiceItem {
 
@@ -6,7 +6,7 @@ public class InvoiceItem {
 	private float price;
 	private float discount;
 	private Reservation reservation;
-	private transient String desc;
+	private String desc;
 
 	public InvoiceItem() {
 		super();

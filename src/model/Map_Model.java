@@ -3,12 +3,13 @@ package model;
 import java.util.ArrayList;
 import java.util.Observable;
 
-import Entities.Area;
-import Entities.Pitch;
-import Entities.PitchGroup;
-import Entities.Reservation;
+import entities.Area;
+import entities.Pitch;
+import entities.PitchGroup;
 
-public class Map_Model extends Observable{
+import Util.ApplicationCore;
+
+public class Map_Model extends Observable {
 
 	private ArrayList<Pitch> selectedPitches;
 	private int maxX, maxY;
@@ -19,8 +20,6 @@ public class Map_Model extends Observable{
 		selectedPitches = new ArrayList<Pitch>();
 	}
 
-	
-	
 	/**
 	 * Calculates the data from the xml file, which describes all the
 	 * information of the
@@ -35,38 +34,31 @@ public class Map_Model extends Observable{
 		maxY = 10;
 		map = new Pitch[maxY][maxY];
 
-		/*
-		 * Insert fake data here
-		 */
-		
-		Area area1 = new Area("Area 1");
-		Area area2 = new Area("Area 2");
-		PitchGroup group1 = new PitchGroup("Tent", 7.5f);
-		group1.setArea(area1);
-		PitchGroup group2 = new PitchGroup("Trailer", 10.5f);
-		group2.setArea(area2);
-		
-		
-		
-		map[1][1] = new Pitch("A52",5, true, true);
-		map[1][1].setGroup(group1);
-		map[2][2] = new Pitch("A52",8, false, true);
-		map[2][2].setGroup(group1);
-		map[3][3] = new Pitch("A42",3, true, true);
-		map[3][3].setGroup(group2);
-		map[4][4] = new Pitch("A5s2",7, true, false);
-		map[4][4].setGroup(group1);
-		map[5][5] = new Pitch("BA52",8, false, false);
-		map[5][5].setGroup(group2);
-		map[5][3] = new Pitch("B52",3, true, true);
-		map[5][3].setGroup(group2);
-		map[5][4] = new Pitch("A32",10, false, true);
-		map[5][4].setGroup(group1);
-		map[5][4].setReservation(new Reservation());
-		
-		this.setChanged();
-		
 
+		int counterX = 0, counterY = 0;
+
+		// use break with a jump mark, to avoid a IndexOutOfBoundsException. It
+		// might not be the most elegant solution, but fits for this
+		// implementation in every case
+
+		outOfTheLoops: 
+		for (Area area : ApplicationCore.provider.getAreas()) {
+			for (PitchGroup group : area.getGroups()) {
+				for (Pitch pitch : group.getPitches()) {
+					map[counterX][counterY] = pitch;
+					counterX++;
+					if (counterX >= maxX) {
+						counterX = 0;
+						counterY++;
+						if (counterY >= maxY) {
+							break outOfTheLoops;
+						}
+					}
+				}
+			}
+		}
+
+		this.setChanged();
 	}
 
 	public ArrayList<Pitch> getSelectedPitches() {
@@ -84,11 +76,11 @@ public class Map_Model extends Observable{
 	public Pitch[][] getMap() {
 		return map;
 	}
-	
-	public void delegateSelection(int x, int y){
-		//check if this pitch already has been selected
-		if(selectedPitches.contains(map[x][y])){
-			//has to be unselected
+
+	public void delegateSelection(int x, int y) {
+		// check if this pitch already has been selected
+		if (selectedPitches.contains(map[x][y])) {
+			// has to be unselected
 			selectedPitches.remove(map[x][y]);
 		} else {
 			selectedPitches.add(map[x][y]);

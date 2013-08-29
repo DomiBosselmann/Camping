@@ -3,6 +3,16 @@ package TestClasses;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 
+import org.joda.time.LocalDate;
+
+
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber.CountryCodeSource;
+
+import entities.Phonenumber;
+
 public class Test {
 	
 
@@ -10,20 +20,8 @@ public class Test {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		myClass[] value = new myClass[3];
-		
-		value[0] = new myClass("Hallo 1");
-		value[1] = new myClass("Hallo 2");
-		value[2] = new myClass("Hallo 3");
-		
-		JFrame frame = new JFrame();
-		JComboBox cb = new JComboBox(value);
-		frame.add(cb);
-		frame.setVisible(true);
-		
-		Object ob = cb.getSelectedItem();
-		myClass it = (myClass) ob;
 
+		System.out.println(null+"");
 
 	}
 

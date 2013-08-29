@@ -3,6 +3,8 @@ package view;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -15,7 +17,11 @@ import javax.swing.JTextField;
 
 import model.Map_Model;
 
-import Entities.Pitch;
+import org.joda.time.LocalDate;
+
+import entities.Pitch;
+import entities.Pitch_Status;
+
 
 public class MapDetails_View extends JPanel implements Observer {
 
@@ -53,7 +59,7 @@ public class MapDetails_View extends JPanel implements Observer {
 		tf_pricePerNight = new JTextField();
 		tf_pricePerNight = new JTextField();
 		btn_book = new JButton("Belegung anlegen");
-		
+
 		btn_book.setEnabled(false);
 
 		tf_pitches.setEditable(false);
@@ -110,8 +116,13 @@ public class MapDetails_View extends JPanel implements Observer {
 
 	@Override
 	public void update(Observable model, Object arg1) {
+		LocalDate today = new LocalDate();
+		LocalDate tomorrow = new LocalDate().plusDays(1);
+
 		Map_Model mapModel = (Map_Model) model;
-		String pitchNames = null, usages = null, areas = null;
+		String pitchNames = null, numUsages = null, numAreas = null;
+		HashMap<String, Integer> usages = new HashMap<String, Integer>();
+		HashMap<String, Integer> areas = new HashMap<String, Integer>();
 		int numberPitches = 0, overallSize = 0, numberPowerSupplies = 0, numberWaterSupplies = 0, numberFree = 0;
 		float price = 0;
 
@@ -123,17 +134,23 @@ public class MapDetails_View extends JPanel implements Observer {
 			} else {
 				pitchNames += ", " + pitch.getPitchId();
 			}
-			if (usages == null) {
-				usages = pitch.getGroup().getUseage();
-			} else {
-				usages += ", " + pitch.getGroup().getUseage();
+			int num;
+			try {
+				num = usages.get(pitch.getGroup().getUsage().toString());
+			} catch (NullPointerException n) {
+				num = 0;
 			}
-			if (areas == null) {
-				areas = pitch.getGroup().getArea().getLabel();
-			} else {
-				areas += ", " + pitch.getGroup().getArea().getLabel();
+			usages.put(pitch.getGroup().getUsage().toString(), num + 1);
+
+			try {
+				num = areas.get(pitch.getGroup().getArea().getLabel());
+			} catch (NullPointerException n) {
+				num = 0;
 			}
-			if (pitch.getReservation() == null) {
+			areas.put(pitch.getGroup().getArea().getLabel(), num + 1);
+
+			if (pitch.getStatusForPeriode(today, tomorrow).equals(
+					Pitch_Status.Available)) {
 				numberFree++;
 			}
 			if (pitch.isPowerSupplied()) {
@@ -143,30 +160,44 @@ public class MapDetails_View extends JPanel implements Observer {
 				numberWaterSupplies++;
 			}
 			overallSize += pitch.getSize();
-			price += pitch.calcPrice();
+			price += pitch.calcPrice(today, tomorrow);
+		}
+		for (Entry<String, Integer> entry : usages.entrySet()) {
+			if (numUsages == null) {
+				numUsages = entry.getValue() + "x " + entry.getKey();
+			} else {
+				numUsages += ", " + entry.getValue() + "x " + entry.getKey();
+			}
+		}
+		for (Entry<String, Integer> entry : areas.entrySet()) {
+			if (numAreas == null) {
+				numAreas = entry.getValue() + "x " + entry.getKey();
+			} else {
+				numAreas += ", " + entry.getValue() + "x " + entry.getKey();
+			}
 		}
 
 		// write the read information
 		tf_pitches.setText(pitchNames);
-		tf_numberPitches.setText(numberPitches+"");
-		tf_usage.setText(usages);
-		tf_areas.setText(areas);
-		tf_size.setText(overallSize+" m*m");
-		tf_numberPower.setText(numberPowerSupplies+" x vorhanden");
-		tf_numberWater.setText(numberWaterSupplies+" x vorhanden");
-		tf_status.setText(numberFree+" Stellplätze verfügbar");
-		tf_pricePerNight.setText(price+" €");
-		
+		tf_numberPitches.setText(numberPitches + "");
+		tf_usage.setText(numUsages);
+		tf_areas.setText(numAreas);
+		tf_size.setText(overallSize + " m*m");
+		tf_numberPower.setText(numberPowerSupplies + " x vorhanden");
+		tf_numberWater.setText(numberWaterSupplies + " x vorhanden");
+		tf_status.setText(numberFree + " Stellplätze verfügbar");
+		tf_pricePerNight.setText(price + " €");
+
 		// check if it's possible to create a booking
-		if(numberPitches == numberFree && numberFree > 0){
+		if (numberPitches == numberFree && numberFree > 0) {
 			btn_book.setEnabled(true);
-		}else{
+		} else {
 			btn_book.setEnabled(false);
 		}
-		
+
 	}
 
-	public void addBookingListener(ActionListener al){
+	public void addBookingListener(ActionListener al) {
 		btn_book.addActionListener(al);
 	}
 }

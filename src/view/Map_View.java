@@ -12,7 +12,11 @@ import javax.swing.JPanel;
 
 import model.Map_Model;
 
-import Entities.Pitch;
+import org.joda.time.LocalDate;
+
+import entities.Pitch;
+import entities.Pitch_Status;
+
 
 public class Map_View extends JPanel implements Observer {
 
@@ -63,8 +67,12 @@ public class Map_View extends JPanel implements Observer {
 	@Override
 	public void update(Observable model, Object arg) {
 		Map_Model mapModel = (Map_Model) model;
+		LocalDate today = new LocalDate();
+		LocalDate tomorrow = new LocalDate().plusDays(1);
+		
 		Pitch[][] map = mapModel.getMap();
 		ArrayList<Pitch> selection = mapModel.getSelectedPitches();
+
 		for (int i = 0; i < fields.length; i++) {
 			for (int j = 0; j < fields[i].length; j++) {
 				// check if the spot is a pitch
@@ -74,20 +82,22 @@ public class Map_View extends JPanel implements Observer {
 					for (ActionListener al : fields[i][j].getActionListeners()) {
 						fields[i][j].removeActionListener(al);
 					}
-				// check if the pitch is selected
+					// check if the pitch is selected
 				} else if (selection.contains(map[i][j])) {
 					// check the availability
-					if (map[i][j].getReservation() == null) {
+					if (map[i][j].getStatusForPeriode(today, tomorrow).equals(
+							Pitch_Status.Available)) {
 						// is available
 						fields[i][j].setBackground(Color.BLUE);
 					} else {
 						// is reserved
 						fields[i][j].setBackground(Color.RED);
 					}
-				// so the pitch has to be unselected
+					// so the pitch has to be unselected
 				} else {
 					// check the availability
-					if (map[i][j].getReservation() == null) {
+					if (map[i][j].getStatusForPeriode(today, tomorrow).equals(
+							Pitch_Status.Available)) {
 						// is available
 						fields[i][j].setBackground(Color.WHITE);
 					} else {

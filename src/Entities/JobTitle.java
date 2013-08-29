@@ -1,9 +1,10 @@
-package Entities;
+package entities;
 
 public class JobTitle {
 
 	private long id;
 	private String name;
+	private int matchingEmployeeType;
 
 	public JobTitle() {
 		super();
@@ -11,9 +12,10 @@ public class JobTitle {
 	
 	
 
-	public JobTitle(String name) {
+	public JobTitle(String name, int matchingEmployeeType) {
 		super();
 		this.name = name;
+		this.matchingEmployeeType = matchingEmployeeType;
 	}
 
 
@@ -33,5 +35,14 @@ public class JobTitle {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+
+
+	@Override
+	public String toString() {
+		return name;
+	}
+	
+	
 
 }

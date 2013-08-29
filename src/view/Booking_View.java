@@ -1,10 +1,12 @@
 package view;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
@@ -12,37 +14,51 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.List;
 import java.util.Observable;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
-import TestClasses.myClass;
+import model.Booking_Model;
 
-import Entities.Booking_Status;
-import Entities.Guest;
-import Entities.Reservation;
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
+
+import entities.Booking_Status;
+import entities.Guest;
+import entities.Pitch;
+
+import Util.ApplicationCore;
 
 public class Booking_View extends JFrame implements ViewForm_Intf {
 
+	// We need to keep track of the selections
+	private SelectionManager manager = new SelectionManager();
+	// and make the selection state available to the renderer.
+	private MultiRenderer renderer = new MultiRenderer(manager);
+
 	private int currentMode;
-	private DateFormat dateFormat = new SimpleDateFormat("dd.mm.yyyy");
+	private DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
 	private JLabel lbl_headline, lbl_startDate, lbl_finishDate, lbl_guest,
 			lbl_status, lbl_pitch, lbl_reservation, lbl_generateTasks,
-			lbl_numberNights, lbl_pricePerNight, lbl_priceOverAll;
+			 lbl_numberNights, lbl_pricePerNight,
+			lbl_priceOverAll;
 	private JTextField tf_numberNights, tf_pricePerNight, tf_priceOverAll;
 	private JFormattedTextField tf_startDate, tf_finishDate;
 	private JComboBox dd_guest, dd_pitches, dd_status;
@@ -53,12 +69,14 @@ public class Booking_View extends JFrame implements ViewForm_Intf {
 	public Booking_View() throws HeadlessException {
 		super();
 		init();
-		this.setSize(450, 370);
+		this.setSize(450, 390);
 		this.setVisible(true);
 	}
 
 	private void init() {
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		Object[] guests = ApplicationCore.provider.getGuests().toArray();
+		Object[] pitches = ApplicationCore.provider.getPitches().toArray();
 
 		// instantiate all panels and layouts
 		JPanel centerPanel = new JPanel();
@@ -76,16 +94,16 @@ public class Booking_View extends JFrame implements ViewForm_Intf {
 		lbl_finishDate = new JLabel("Zeitraum bis:");
 		lbl_guest = new JLabel("Gast");
 		lbl_pitch = new JLabel("Stellplatz");
-		lbl_generateTasks = new JLabel("generiere Aufgaben");
-		lbl_reservation = new JLabel("zusätzliche Reservierung");
-		lbl_numberNights = new JLabel("Anzahl Übernachtungen");
-		lbl_pricePerNight = new JLabel("Preis pro Nacht");
-		lbl_priceOverAll = new JLabel("Gesamtpreis");
-		lbl_status = new JLabel("Status");
+		lbl_generateTasks = new JLabel("generiere Aufgaben:");
+		lbl_reservation = new JLabel("zusätzliche Reservierung:");
+		lbl_numberNights = new JLabel("Anzahl Übernachtungen:");
+		lbl_pricePerNight = new JLabel("Preis pro Nacht:");
+		lbl_priceOverAll = new JLabel("Gesamtpreis:");
+		lbl_status = new JLabel("Status:");
 		lbl_headline = new JLabel();
-		dd_status = new JComboBox();
-		dd_guest = new JComboBox();
-		dd_pitches = new JComboBox();
+		dd_status = new JComboBox(Booking_Status.values());
+		dd_guest = new JComboBox(guests);
+		dd_pitches = new JComboBox(pitches);
 		cb_generateTasks = new JCheckBox();
 		tf_numberNights = new JTextField();
 		tf_pricePerNight = new JTextField();
@@ -106,11 +124,14 @@ public class Booking_View extends JFrame implements ViewForm_Intf {
 		tf_priceOverAll.setEnabled(false);
 		tf_pricePerNight.setEnabled(false);
 		btn_reservation.setEnabled(false);
-		btn_modify.setMnemonic(KeyEvent.VK_M);
-		btn_delete.setMnemonic(KeyEvent.VK_D);
+		dd_pitches.addActionListener(manager);
+		dd_pitches.setRenderer(renderer);
+		btn_modify.setMnemonic(KeyEvent.VK_E);
+		btn_delete.setMnemonic(KeyEvent.VK_L);
 		btn_exec.setMnemonic(KeyEvent.VK_S);
-		// TODO drop downs füllen, besser in update
-		// TODO panel für ausgewählte reservierungen
+		tf_startDate.addActionListener(new UglyCodingListener());
+		tf_finishDate.addActionListener(new UglyCodingListener());
+		
 
 		// map the controls to the panels
 		categoryHeader.add(btn_delete);
@@ -154,16 +175,36 @@ public class Booking_View extends JFrame implements ViewForm_Intf {
 
 	@Override
 	public void update(Observable modelObservable, Object arg) {
-		// if (modelObservable instanceof Booking_Model) {
-		// Booking_Model model = (Employee_Model) modelObservable;
-		// if (currentMode != this.MODE_CREATE) {
-		// lbl_headline.setText(model.toString());
-		//
-		//
-		// }
-		// } else {
-		// throw new RuntimeException("Undefined model instance");
-		// }
+		if (modelObservable instanceof Booking_Model) {
+			Booking_Model model = (Booking_Model) modelObservable;
+			
+			btn_exec.setEnabled(false);
+			
+
+			if (model.getStartDate() != null) {
+				String start = model.getStartDate().getDayOfMonth() + "."
+						+ model.getStartDate().getMonthOfYear() + "."
+						+ model.getStartDate().getYear();
+				tf_startDate.setText(start);
+			}
+			if (model.getFinishDate() != null) {
+				String finish = model.getFinishDate().getDayOfMonth() + "."
+						+ model.getFinishDate().getMonthOfYear() + "."
+						+ model.getFinishDate().getYear();
+				tf_finishDate.setText(finish);
+			}
+			dd_guest.setSelectedItem(model.getGuest());
+			dd_status.setSelectedItem(model.getStatus());
+			cb_generateTasks.setSelected(model.isTaskGenerating());
+
+			//TODO pitches fehlen
+			
+			
+			lbl_headline.setText(model.toString());
+
+		} else {
+			throw new RuntimeException("Undefined model instance");
+		}
 	}
 
 	@Override
@@ -196,6 +237,12 @@ public class Booking_View extends JFrame implements ViewForm_Intf {
 			lbl_headline.setVisible(true);
 			this.setTitle("Buchung anzeigen");
 
+			tf_startDate.setEnabled(false);
+			tf_finishDate.setEnabled(false);
+			dd_guest.setEnabled(false);
+			dd_pitches.setEnabled(false);
+			dd_status.setEnabled(false);
+			cb_generateTasks.setEnabled(false);
 			break;
 		case MODE_MODIFY:
 			btn_exec.setVisible(true);
@@ -206,6 +253,13 @@ public class Booking_View extends JFrame implements ViewForm_Intf {
 			btn_modify.setText("Buchung anzeigen");
 			lbl_headline.setVisible(true);
 			this.setTitle("Buchung bearbeiten");
+
+			tf_startDate.setEnabled(true);
+			tf_finishDate.setEnabled(true);
+			dd_guest.setEnabled(true);
+			dd_pitches.setEnabled(true);
+			dd_status.setEnabled(true);
+			cb_generateTasks.setEnabled(true);
 			break;
 		case MODE_CREATE:
 			btn_exec.setVisible(true);
@@ -214,6 +268,13 @@ public class Booking_View extends JFrame implements ViewForm_Intf {
 			btn_modify.setVisible(false);
 			lbl_headline.setVisible(false);
 			this.setTitle("Buchung anlegen");
+
+			tf_startDate.setEnabled(true);
+			tf_finishDate.setEnabled(true);
+			dd_guest.setEnabled(true);
+			dd_pitches.setEnabled(true);
+			dd_status.setEnabled(true);
+			cb_generateTasks.setEnabled(true);
 			break;
 		default:
 			throw new RuntimeException("Undefined integer value");
@@ -258,11 +319,10 @@ public class Booking_View extends JFrame implements ViewForm_Intf {
 		}
 	}
 
-	public ArrayList<Reservation> getReservations() {
-		ArrayList<Reservation> list = new ArrayList<Reservation>();
-		// TODO Implemetation
+	public ArrayList<Pitch> getPitches() {
+		// cast to arraylist of type pitches
 
-		return list;
+		return (ArrayList<Pitch>) manager.selectedItems;
 	}
 
 	public Guest getGuest() {
@@ -277,19 +337,19 @@ public class Booking_View extends JFrame implements ViewForm_Intf {
 		return status;
 	}
 
-	public Date getFinishDate() {
+	public LocalDate getFinishDate() {
 		String date = tf_finishDate.getText();
 		try {
-			return dateFormat.parse(date);
+			return new LocalDate(dateFormat.parse(date));
 		} catch (ParseException e) {
 			return null;
 		}
 	}
 
-	public Date getStartDate() {
+	public LocalDate getStartDate() {
 		String date = tf_startDate.getText();
 		try {
-			return dateFormat.parse(date);
+			return new LocalDate(dateFormat.parse(date));
 		} catch (ParseException e) {
 			return null;
 		}
@@ -299,8 +359,121 @@ public class Booking_View extends JFrame implements ViewForm_Intf {
 		return cb_generateTasks.isSelected();
 	}
 
-	public static void main(String[] args) {
-		new Booking_View().changeMode(MODE_MODIFY);
+	public void setTemplate(ArrayList<Pitch> pitches,LocalDate startDate,LocalDate finishDate) {
+		manager.selectedItems = pitches;
+		String date = startDate.getDayOfMonth() + "."
+				+ startDate.getMonthOfYear() + "." + startDate.getYear();
+		tf_startDate.setText(date);
+		date = finishDate.getDayOfMonth() + "."
+				+ finishDate.getMonthOfYear() + "." + finishDate.getYear();
+		tf_finishDate.setText(date);
+		dd_status.setSelectedItem(Booking_Status.Reserved);
+		dd_status.setEnabled(false);
+		new UglyCodingListener().actionPerformed(null);
+//		dd_pitches.setEnabled(false);
+//		tf_startDate.setEnabled(false);
+//		tf_finishDate.setEnabled(false);
 	}
 
+	class SelectionManager implements ActionListener {
+		@SuppressWarnings("rawtypes")
+		JComboBox combo = null;
+		List<Pitch> selectedItems = new ArrayList<Pitch>(); // j2se 1.5+
+		List<Pitch> nonSelectables = new ArrayList<Pitch>();
+
+		public void actionPerformed(ActionEvent e) {
+			if (combo == null) {
+				combo = (JComboBox) e.getSource();
+			}
+			Pitch item = (Pitch) combo.getSelectedItem();
+			// Toggle the selection state for item.
+			if (selectedItems.contains(item)) {
+				selectedItems.remove(item);
+			} else if (!nonSelectables.contains(item)) {
+				selectedItems.add(item);
+			}
+			if (selectedItems.size() > 1) {
+				lbl_pitch.setText("Stellplätze:");
+			} else {
+				lbl_pitch.setText("Stellplatz:");
+			}
+		}
+
+		/**
+		 * The varargs feature (Object... args) is new in j2se 1.5 You can
+		 * replace the argument with an array.
+		 */
+		public void setNonSelectables(Pitch... args) {
+			for (int j = 0; j < args.length; j++) {
+				nonSelectables.add(args[j]);
+			}
+		}
+
+		public boolean isSelected(Object item) {
+			return selectedItems.contains(item);
+		}
+	}
+
+	/** Implementation copied from source code. */
+	@SuppressWarnings("serial")
+	class MultiRenderer extends BasicComboBoxRenderer {
+		SelectionManager selectionManager;
+
+		public MultiRenderer(SelectionManager sm) {
+			selectionManager = sm;
+		}
+
+		public Component getListCellRendererComponent(JList list, Object value,
+				int index, boolean isSelected, boolean cellHasFocus) {
+			if (selectionManager.isSelected(value)) {
+				setBackground(list.getSelectionBackground());
+				setForeground(list.getSelectionForeground());
+			} else {
+				setBackground(list.getBackground());
+				setForeground(list.getForeground());
+			}
+
+			setFont(list.getFont());
+
+			if (value instanceof Icon) {
+				setIcon((Icon) value);
+			} else {
+				setText((value == null) ? "" : value.toString());
+			}
+			return this;
+		}
+	}
+	
+	class UglyCodingListener implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			
+			ArrayList<Pitch> freePitches = (ArrayList<Pitch>) ApplicationCore.provider
+					.getFreePitchesFromTo(getStartDate(), getFinishDate());
+			float pricePerNight = 0.0f;
+			int numNights;
+			numNights = Days.daysBetween(getStartDate() , getFinishDate() ).getDays() ;
+			tf_numberNights.setText(numNights+"");
+			
+			if (freePitches.containsAll(getPitches())) {
+				for (Pitch pitch : getPitches()) {
+					pricePerNight += pitch.calcPrice(getStartDate(), getFinishDate());
+				}
+				tf_pricePerNight.setText(pricePerNight+"");
+				tf_priceOverAll.setText(numNights*pricePerNight+"");
+				
+				// if it's possible to book
+				if (pricePerNight > 0 && numNights > 0) {
+					btn_exec.setEnabled(true);
+				}
+			} else {
+				tf_pricePerNight.setText("");
+				tf_priceOverAll.setText("");
+				btn_exec.setEnabled(false);
+			}
+			
+		}
+		
+	}
 }

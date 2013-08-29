@@ -1,16 +1,39 @@
-package Entities;
+package entities;
 
-import java.util.Date;
+import org.joda.time.LocalDate;
 
 public class Reservation {
 
 	private long id;
-	private Date startDate;
-	private Date finishDate;
+	private LocalDate startDate;
+	private LocalDate finishDate;
 	private Pitch pitch;
+	private Booking booking;
 
 	public Reservation() {
 		super();
+	}
+
+	/**
+	 * Generates a new instance an register this instance at the corresponding
+	 * booking and pitch instances
+	 * 
+	 * @param id
+	 * @param startDate
+	 * @param finishDate
+	 * @param pitch
+	 * @param booking
+	 */
+	public Reservation(long id, LocalDate startDate, LocalDate finishDate,
+			Pitch pitch, Booking booking) {
+		super();
+		this.id = id;
+		this.startDate = startDate;
+		this.finishDate = finishDate;
+		this.pitch = pitch;
+		this.booking = booking;
+		pitch.addReservation(this);
+		booking.addReservation(this);
 	}
 
 	public long getId() {
@@ -21,19 +44,19 @@ public class Reservation {
 		this.id = id;
 	}
 
-	public Date getStartDate() {
+	public LocalDate getStartDate() {
 		return startDate;
 	}
 
-	public void setStartDate(Date startDate) {
+	public void setStartDate(LocalDate startDate) {
 		this.startDate = startDate;
 	}
 
-	public Date getFinishDate() {
+	public LocalDate getFinishDate() {
 		return finishDate;
 	}
 
-	public void setFinishDate(Date finishDate) {
+	public void setFinishDate(LocalDate finishDate) {
 		this.finishDate = finishDate;
 	}
 
@@ -45,12 +68,18 @@ public class Reservation {
 		this.pitch = pitch;
 	}
 
+	public Booking getBooking() {
+		return booking;
+	}
+
+	public void setBooking(Booking booking) {
+		this.booking = booking;
+	}
+
 	@Override
 	public String toString() {
-		return pitch.getPitchId() + "( " + startDate + " - "
-				+ finishDate + " )";
+		return pitch.getPitchId() + "( " + startDate + " - " + finishDate
+				+ " )";
 	}
-	
-	
 
 }

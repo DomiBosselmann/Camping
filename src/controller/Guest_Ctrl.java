@@ -4,19 +4,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.Date;
-
-import javax.swing.JCheckBox;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
-import controller.Employee_Ctrl.DeleteListener;
 
 import model.Guest_Model;
+
+import org.joda.time.LocalDate;
+
+import entities.Address;
+import entities.Guest;
+import entities.IdentityCard;
+import entities.Phonenumber;
+
 import view.Guest_View;
-import Entities.Address;
-import Entities.Guest;
-import Entities.IdentityCard;
 
 public class Guest_Ctrl {
 
@@ -26,14 +24,14 @@ public class Guest_Ctrl {
 	public Guest_Ctrl() {
 		super();
 		model = new Guest_Model();
-//		 Guest ad = new Guest();
-//		 ad.setFirstName("Marius");
-//		 ad.setLastName("Obert");
-//		 IdentityCard p = new IdentityCard("MO2409", "Germany");
-//		 Address a = new Address("Rankach", "30", 77709, "Oberwolfach");
-//		 ad.setAddress(a);
-//		 ad.setId(p);
-//		 modifyGuest(ad);
+		// Guest ad = new Guest();
+		// ad.setFirstName("Marius");
+		// ad.setLastName("Obert");
+		// IdentityCard p = new IdentityCard("MO2409", "Germany");
+		// Address a = new Address("Rankach", "30", 77709, "Oberwolfach");
+		// ad.setAddress(a);
+		// ad.setId(p);
+		// modifyGuest(ad);
 	}
 
 	/**
@@ -69,8 +67,6 @@ public class Guest_Ctrl {
 	}
 
 	private void init(int mode) {
-		// TODO Change to real JPA access
-
 		view = new Guest_View();
 		view.changeMode(mode);
 		model.addObserver(view);
@@ -84,13 +80,14 @@ public class Guest_Ctrl {
 
 			String firstName = view.getFirstName();
 			String lastName = view.getLastName();
-			Date birthday = view.getBirthdate();
+			LocalDate birthday = view.getBirthdate();
 			Address address = view.getAddress();
 			IdentityCard id = view.getId();
+			Phonenumber number = view.getPhonenumber();
 
 			// if one or more values aren't set
 			if (firstName == null || lastName == null || birthday == null
-					|| address == null || id == null) {
+					|| address == null || id == null || number == null) {
 				return;
 			}
 			System.out.println("Create action triggered");
@@ -98,6 +95,7 @@ public class Guest_Ctrl {
 			model.setLastName(lastName);
 			model.setAddress(address);
 			model.setBirthdate(birthday);
+			model.setPhonenumber(number);
 			model.setId(id);
 
 			model.notifyObservers();
@@ -111,7 +109,7 @@ public class Guest_Ctrl {
 		public void actionPerformed(ActionEvent arg0) {
 			String firstName = view.getFirstName();
 			String lastName = view.getLastName();
-			Date birthday = view.getBirthdate();
+			LocalDate birthday = view.getBirthdate();
 			Address address = view.getAddress();
 			IdentityCard id = view.getId();
 
@@ -135,12 +133,12 @@ public class Guest_Ctrl {
 	class ChangeModeListener implements ItemListener {
 
 		public void itemStateChanged(ItemEvent ev) {
-		      if(ev.getStateChange()==ItemEvent.SELECTED){
-		        view.changeMode(view.MODE_MODIFY);
-		      } else if(ev.getStateChange()==ItemEvent.DESELECTED){
-		    	  view.changeMode(view.MODE_SHOW);
-		      }
-		   }
+			if (ev.getStateChange() == ItemEvent.SELECTED) {
+				view.changeMode(view.MODE_MODIFY);
+			} else if (ev.getStateChange() == ItemEvent.DESELECTED) {
+				view.changeMode(view.MODE_SHOW);
+			}
+		}
 
 	}
 
@@ -149,7 +147,15 @@ public class Guest_Ctrl {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			System.out.println("Delete this entity now");
-			// TODO Auto-generated method stub
+
+		}
+	}
+
+	class createEquipmentListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			System.out.println("Create a new Equipment entity now");
 
 		}
 	}

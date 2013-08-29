@@ -1,6 +1,8 @@
-package Entities;
+package entities;
 
-import java.util.Date;
+import org.joda.time.LocalDate;
+
+
 
 public abstract class Person {
 
@@ -8,13 +10,12 @@ public abstract class Person {
 	protected Address address;
 	protected String firstName;
 	protected String lastName;
-	protected Date dateOfBirth;
+	protected LocalDate dateOfBirth;
+	protected Phonenumber phonenumber;
 
 	public Person() {
 		super();
 	}
-	
-	
 
 	public Address getAddress() {
 		return address;
@@ -48,11 +49,20 @@ public abstract class Person {
 		this.lastName = lastName;
 	}
 
-	public Date getDateOfBirth() {
+	public LocalDate getDateOfBirth() {
 		return dateOfBirth;
 	}
 
-	public void setDateOfBirth(Date dateOfBirth) {
+	public void setDateOfBirth(LocalDate dateOfBirth) {
 		this.dateOfBirth = dateOfBirth;
 	}
+
+	public Phonenumber getPhonenumber() {
+		return phonenumber;
+	}
+
+	public void setPhonenumber(Phonenumber phonenumber) {
+		this.phonenumber = phonenumber;
+	}
+
 }

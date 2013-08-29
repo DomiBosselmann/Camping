@@ -9,15 +9,19 @@ import java.util.Date;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
+import org.joda.time.LocalDate;
+
+import entities.Address;
+import entities.AdminEmployee;
+import entities.Employee;
+import entities.IdentityCard;
+import entities.JobTitle;
+import entities.Phonenumber;
+import entities.ReceptionEmployee;
+import entities.TechnicalEmployee;
+
 import model.Employee_Model;
 import view.Employee_View;
-import Entities.Address;
-import Entities.AdminEmployee;
-import Entities.Employee;
-import Entities.IdentityCard;
-import Entities.JobTitle;
-import Entities.ReceptionEmployee;
-import Entities.TechnicalEmployee;
 
 public class Employee_Ctrl {
 
@@ -91,8 +95,6 @@ public class Employee_Ctrl {
 	}
 
 	private void init(int mode) {
-		// TODO Change to real JPA access
-
 		view = new Employee_View();
 		view.changeMode(mode);
 		model.addObserver(view);
@@ -108,9 +110,10 @@ public class Employee_Ctrl {
 			String lastName = view.getLastName();
 			JobTitle jobTitle = view.getJobTitle();
 			String password = view.getPassword();
-			Date birthday = view.getBirthdate();
+			LocalDate birthday = view.getBirthdate();
 			Address address = view.getAddress();
 			IdentityCard id = view.getId();
+			Phonenumber number = view.getPhonenumber();
 			String insuranceNumber = view.getInsuranceNumber();
 
 			// if one or more values aren't set.
@@ -118,7 +121,7 @@ public class Employee_Ctrl {
 			// password doesn't take place
 			if (firstName == null || lastName == null || jobTitle == null
 					|| password == null || birthday == null || address == null
-					|| id == null || insuranceNumber == null) {
+					|| id == null || insuranceNumber == null || number == null) {
 				return;
 			}
 			System.out.println("Create action triggered");
@@ -127,6 +130,7 @@ public class Employee_Ctrl {
 			model.setAddress(address);
 			model.setBirthdate(birthday);
 			model.setId(id);
+			model.setPhonenumber(number);
 			model.setJobTitle(jobTitle);
 			model.setPassword(password);
 			model.setInsuranceNumber(insuranceNumber);
@@ -144,7 +148,7 @@ public class Employee_Ctrl {
 			String lastName = view.getLastName();
 			JobTitle jobTitle = view.getJobTitle();
 			String password = view.getPassword();
-			Date birthday = view.getBirthdate();
+			LocalDate birthday = view.getBirthdate();
 			Address address = view.getAddress();
 			IdentityCard id = view.getId();
 
@@ -174,8 +178,6 @@ public class Employee_Ctrl {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			System.out.println("Delete this entity now");
-			// TODO Auto-generated method stub
-
 		}
 	}
 

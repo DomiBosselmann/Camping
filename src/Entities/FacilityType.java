@@ -1,10 +1,12 @@
-package Entities;
+package entities;
+
+import java.util.ArrayList;
 
 public class FacilityType extends Property {
 
 	private long id;
 	private String name;
-	private Effort effort;
+	private ArrayList<Facility> facilities;
 
 	public FacilityType() {
 		super();
@@ -18,6 +20,14 @@ public class FacilityType extends Property {
 		this.id = id;
 	}
 
+	public ArrayList<Facility> getFacilities() {
+		return facilities;
+	}
+
+	public void setFacilities(ArrayList<Facility> facilities) {
+		this.facilities = facilities;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -25,17 +35,5 @@ public class FacilityType extends Property {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	public Effort getEffort() {
-		return effort;
-	}
-
-	public void setEffort(Effort effort) {
-		this.effort = effort;
-	}
-
-
-
-	
 
 }

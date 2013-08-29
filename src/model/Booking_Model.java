@@ -1,65 +1,52 @@
 package model;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 
-import Entities.Booking;
-import Entities.Booking_Status;
-import Entities.Guest;
-import Entities.Reservation;
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
+
+import entities.Booking;
+import entities.Booking_Status;
+import entities.Guest;
+import entities.Pitch;
+import entities.Reservation;
+
 
 public class Booking_Model extends Observable {
 
 	private Booking booking;
-	private boolean taskGenerating;
 
 	public Booking_Model() {
 		super();
 	}
 
 	public boolean isTaskGenerating() {
-		return taskGenerating;
-	}
-
-	public float getPricePerNight() {
-		List<Reservation> reservations = booking.getReservations();
-		float sum = 0;
-		for (Reservation reser : reservations) {
-			sum += reser.getPitch().calcPrice();
-		}
-		return sum;
+		return booking.isTaskGenerating();
 	}
 
 	public void setBooking(Booking booking) {
 		this.booking = booking;
-		this.hasChanged();
+		this.setChanged();
 	}
 
 	public void setTaskGenerating(boolean taskGenerating) {
-		this.taskGenerating = taskGenerating;
-		this.hasChanged();
+		booking.setTaskGenerating(taskGenerating);
+		this.setChanged();
 	}
 
-	public int getNumberNights() {
-		long result = booking.getFinishDate().getTime()
-				- booking.getStartDate().getTime();
-		result = result / (24 * 60 * 60 * 1000);
-		// TODO check if necessary
-		return (int) Math.ceil(result);
-	}
-
-	public Date getStartDate() {
+	public LocalDate getStartDate() {
 		return booking.getStartDate();
 	}
 
-	public void setStartDate(Date startDate) {
+	public void setStartDate(LocalDate startDate) {
 		booking.setStartDate(startDate);
-		this.hasChanged();
+		this.setChanged();
 	}
 
-	public Date getFinishDate() {
+	public LocalDate getFinishDate() {
 		return booking.getFinishDate();
 	}
 
@@ -69,7 +56,7 @@ public class Booking_Model extends Observable {
 
 	public void setStatus(Booking_Status status) {
 		booking.setStatus(status);
-		this.hasChanged();
+		this.setChanged();
 	}
 
 	private void checkFollowUpTasks() {
@@ -90,16 +77,16 @@ public class Booking_Model extends Observable {
 
 	public void setGuest(Guest guest) {
 		booking.setGuest(guest);
-		this.hasChanged();
+		this.setChanged();
 	}
 
 	public Booking_Status getStatus() {
 		return booking.getStatus();
 	}
 
-	public void setFinishDate(Date finishDate) {
+	public void setFinishDate(LocalDate finishDate) {
 		booking.setFinishDate(finishDate);
-		this.hasChanged();
+		this.setChanged();
 	}
 
 	public ArrayList<Reservation> getReservations() {
@@ -108,18 +95,41 @@ public class Booking_Model extends Observable {
 
 	public void setReservations(ArrayList<Reservation> reservations) {
 		booking.setReservations(reservations);
-		this.hasChanged();
+		this.setChanged();
 	}
 
-	public boolean addReservation(Reservation reservation) {
-		this.hasChanged();
-		return booking.addReservation(reservation);
+	public void addReservation(LocalDate startDate, LocalDate finishDate,
+			Pitch pitch) {
+		boolean found = false;
+		if (booking.getReservations() != null) {
+			for (Reservation reservation : booking.getReservations()) {
+				if (reservation.getPitch() == pitch) {
+					found = true;
+					reservation.setStartDate(startDate);
+					reservation.setFinishDate(finishDate);
+					this.setChanged();
+				}
+			}
+		}
+		if (!found) {
+			Reservation res = new Reservation(0, startDate, finishDate, pitch,
+					booking);
+			this.setChanged();
+		}
 	}
 
 	public boolean removeReservation(Reservation reservation) {
-		this.hasChanged();
+		this.setChanged();
 		return booking.removeReservation(reservation);
+	}
 
+	public void removeAllReservations() {
+		booking.setReservations(new ArrayList<Reservation>());
+	}
+
+	@Override
+	public String toString() {
+		return booking.toString();
 	}
 
 }

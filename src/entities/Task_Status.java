@@ -1,15 +1,14 @@
 package entities;
 
-public enum Booking_Status {
-	
-    Canceled ("Storniert"),
+public enum Task_Status {
+
+	Canceled ("Storniert"),
     Reserved ("Reserviert"),
-    Closed ("Abgeschloﬂen"),
-    Active ("Aktiv");
+    Closed ("Abgeschloﬂen");
 
     private final String value;
 
-    Booking_Status(String value) {
+    Task_Status(String value) {
         this.value = value;
     }
 

@@ -1,14 +1,15 @@
-package Entities;
+package entities;
 
 import java.util.ArrayList;
-import java.util.Date;
+
+import org.joda.time.LocalDate;
 
 public class Invoice {
 
 	private long invoiceId;
-	private Date issueDate;
-	private String status;
-	private String paymentMethod;
+	private LocalDate issueDate;
+	private Invoice_Status status;
+	private Invoice_PaymentMethod paymentMethod;
 	private String note;
 	private float price;
 	private ArrayList<InvoiceItem> items;
@@ -25,27 +26,27 @@ public class Invoice {
 		this.invoiceId = id;
 	}
 
-	public Date getIssueDate() {
+	public LocalDate getIssueDate() {
 		return issueDate;
 	}
 
-	public void setIssueDate(Date issueDate) {
+	public void setIssueDate(LocalDate issueDate) {
 		this.issueDate = issueDate;
 	}
 
-	public String getStatus() {
+	public Invoice_Status getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(Invoice_Status status) {
 		this.status = status;
 	}
 
-	public String getPaymentMethod() {
+	public Invoice_PaymentMethod getPaymentMethod() {
 		return paymentMethod;
 	}
 
-	public void setPaymentMethod(String paymentMethod) {
+	public void setPaymentMethod(Invoice_PaymentMethod paymentMethod) {
 		this.paymentMethod = paymentMethod;
 	}
 
@@ -72,5 +73,4 @@ public class Invoice {
 	public void setItems(ArrayList<InvoiceItem> items) {
 		this.items = items;
 	}
-
 }

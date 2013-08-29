@@ -3,17 +3,15 @@ package controller;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Observable;
-import java.util.Observer;
 
 import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.event.ChangeListener;
+
+import model.Map_Model;
+
+import org.joda.time.LocalDate;
 
 import view.MapDetails_View;
 import view.Map_View;
-
-import model.Map_Model;
 
 public class Map_Ctrl extends JComponent {
 
@@ -66,12 +64,10 @@ public class Map_Ctrl extends JComponent {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out
-					.println("Later I will call "
-							+ "an instance of a booking form and "
-							+ "attach the pitches an the "
-							+ "date of the booking here");
-			//TODO check if all pitches are free
+			LocalDate today = new LocalDate();
+			LocalDate tomorrow = new LocalDate().plusDays(1);
+			
+			new Booking_Ctrl().createNewBookingFromTemplate(mapModel.getSelectedPitches(), today, tomorrow);
 		}
 
 	}

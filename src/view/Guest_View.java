@@ -11,13 +11,11 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Observable;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -26,30 +24,39 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
-import javax.swing.event.ChangeListener;
 
 import model.Guest_Model;
-import Entities.Address;
-import Entities.IdentityCard;
+
+import org.joda.time.LocalDate;
+
+
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber.CountryCodeSource;
+
+import entities.Address;
+import entities.IdentityCard;
+import entities.Phonenumber;
 
 public class Guest_View extends JFrame implements ViewForm_Intf {
 
 	private int currentMode;
-	private DateFormat dateFormat = new SimpleDateFormat("dd.mm.yyyy");
+	private DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
 	private JLabel lbl_firstName, lbl_lastName, lbl_streetName, lbl_houseNo,
-			lbl_City, lbl_zipCode, lbl_country, lbl_birthdate, lbl_IdNumber,
-			lbl_headline;
+			lbl_phonenumber, lbl_equipment, lbl_City, lbl_zipCode, lbl_country,
+			lbl_birthdate, lbl_IdNumber, lbl_headline;
 	private JTextField tf_firstName, tf_lastName, tf_streetName, tf_houseNo,
-			tf_city, tf_country, tf_IdNumber;
+			tf_phonenumber, tf_city, tf_country, tf_IdNumber;
 	private JFormattedTextField tf_zipCode, tf_birthdate;
-	private JButton btn_exec, btn_delete;
+	private JButton btn_exec, btn_delete, btn_equipment;
 	private JToggleButton btn_modify;
 
 	public Guest_View() {
 		super();
 		init();
-		this.setSize(400, 320);
+		this.setSize(430, 350);
 		this.setVisible(true);
 	}
 
@@ -76,6 +83,7 @@ public class Guest_View extends JFrame implements ViewForm_Intf {
 
 			tf_firstName.setEditable(false);
 			tf_lastName.setEditable(false);
+			tf_phonenumber.setEditable(false);
 			tf_streetName.setEditable(false);
 			tf_houseNo.setEditable(false);
 			tf_city.setEditable(false);
@@ -97,6 +105,7 @@ public class Guest_View extends JFrame implements ViewForm_Intf {
 			tf_firstName.setEditable(true);
 			tf_lastName.setEditable(true);
 			tf_streetName.setEditable(true);
+			tf_phonenumber.setEditable(true);
 			tf_houseNo.setEditable(true);
 			tf_city.setEditable(true);
 			tf_country.setEditable(true);
@@ -115,6 +124,7 @@ public class Guest_View extends JFrame implements ViewForm_Intf {
 			tf_firstName.setEditable(true);
 			tf_lastName.setEditable(true);
 			tf_streetName.setEditable(true);
+			tf_phonenumber.setEditable(true);
 			tf_houseNo.setEditable(true);
 			tf_city.setEditable(true);
 			tf_country.setEditable(true);
@@ -138,6 +148,8 @@ public class Guest_View extends JFrame implements ViewForm_Intf {
 		centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 		JPanel categoryID = new JPanel();
 		categoryID.setLayout(new GridLayout(0, 2));
+		JPanel categoryEquipment = new JPanel();
+		categoryEquipment.setLayout(new GridLayout(0, 2));
 		JPanel categoryHeader = new JPanel();
 		categoryHeader.setLayout(new GridLayout(0, 2));
 		JPanel categoryPerson = new JPanel();
@@ -151,7 +163,9 @@ public class Guest_View extends JFrame implements ViewForm_Intf {
 		lbl_houseNo = new JLabel("Hausnummer:");
 		lbl_City = new JLabel("Stadt:");
 		lbl_zipCode = new JLabel("PLZ:");
+		lbl_equipment = new JLabel("Ausrüstung:");
 		lbl_country = new JLabel("Ausstellungsland:");
+		lbl_phonenumber = new JLabel("Telefonnummer:");
 		lbl_birthdate = new JLabel("Geburtsdatum:");
 		lbl_IdNumber = new JLabel("Personalausweisnummer:");
 		lbl_headline = new JLabel();
@@ -163,7 +177,9 @@ public class Guest_View extends JFrame implements ViewForm_Intf {
 		tf_zipCode = new JFormattedTextField(nf);
 		tf_country = new JTextField();
 		tf_birthdate = new JFormattedTextField(dateFormat);
+		tf_phonenumber = new JTextField();
 		tf_IdNumber = new JTextField();
+		btn_equipment = new JButton("Neue Ausrüstung anlegen");
 		btn_exec = new JButton();
 		btn_delete = new JButton("Gast löschen");
 		btn_modify = new JToggleButton();
@@ -173,9 +189,10 @@ public class Guest_View extends JFrame implements ViewForm_Intf {
 		lbl_headline.setFont(new Font(curFont.getFontName(),
 				curFont.getStyle(), 20));
 		lbl_headline.setHorizontalAlignment(SwingConstants.CENTER);
-		btn_modify.setMnemonic(KeyEvent.VK_M);
-		btn_delete.setMnemonic(KeyEvent.VK_D);
+		btn_modify.setMnemonic(KeyEvent.VK_E);
+		btn_delete.setMnemonic(KeyEvent.VK_L);
 		btn_exec.setMnemonic(KeyEvent.VK_S);
+		btn_equipment.setEnabled(false);
 
 		// map the controls to the panels
 		categoryHeader.add(btn_delete);
@@ -192,20 +209,28 @@ public class Guest_View extends JFrame implements ViewForm_Intf {
 		centerPanel.add(categoryID);
 		centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
+		categoryEquipment.add(lbl_equipment);
+		categoryEquipment.add(btn_equipment);
+
+		centerPanel.add(categoryEquipment);
+		centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+
 		categoryPerson.add(lbl_firstName);
 		categoryPerson.add(tf_firstName);
 		categoryPerson.add(lbl_lastName);
 		categoryPerson.add(tf_lastName);
 		categoryPerson.add(lbl_birthdate);
 		categoryPerson.add(tf_birthdate);
+		categoryPerson.add(lbl_phonenumber);
+		categoryPerson.add(tf_phonenumber);
 		categoryPerson.add(lbl_streetName);
 		categoryPerson.add(tf_streetName);
 		categoryPerson.add(lbl_houseNo);
 		categoryPerson.add(tf_houseNo);
-		categoryPerson.add(lbl_City);
-		categoryPerson.add(tf_city);
 		categoryPerson.add(lbl_zipCode);
 		categoryPerson.add(tf_zipCode);
+		categoryPerson.add(lbl_City);
+		categoryPerson.add(tf_city);
 
 		centerPanel.add(categoryPerson);
 		centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
@@ -232,6 +257,27 @@ public class Guest_View extends JFrame implements ViewForm_Intf {
 				street, houseNo, zipCode, city);
 	}
 
+	public Phonenumber getPhonenumber() {
+		Phonenumber myNumber = null;
+		PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+
+		try {
+			PhoneNumber number = phoneUtil
+					.parse(tf_phonenumber.getText(), "DE");
+			myNumber = new Phonenumber();
+			myNumber.setCountry(number.getCountryCode());
+			myNumber.setNationalNumber(number.getNationalNumber());
+			if (number.getCountryCodeSource().equals(
+					CountryCodeSource.FROM_NUMBER_WITH_PLUS_SIGN)) {
+				myNumber.setBeginningWithPlusSign(true);
+			}
+		} catch (NumberParseException e) {
+			System.err.println("NumberParseException was thrown: "
+					+ e.toString());
+		}
+		return myNumber;
+	}
+
 	public IdentityCard getId() {
 		String IdNum = tf_IdNumber.getText();
 		String country = tf_country.getText();
@@ -250,10 +296,10 @@ public class Guest_View extends JFrame implements ViewForm_Intf {
 		return (ret.equals("")) ? null : ret;
 	}
 
-	public Date getBirthdate() {
+	public LocalDate getBirthdate() {
 		String date = tf_birthdate.getText();
 		try {
-			return dateFormat.parse(date);
+			return new LocalDate(dateFormat.parse(date));
 		} catch (ParseException e) {
 			return null;
 		}
@@ -263,11 +309,23 @@ public class Guest_View extends JFrame implements ViewForm_Intf {
 	public void update(Observable modelObservable, Object arg) {
 		if (modelObservable instanceof Guest_Model) {
 			Guest_Model model = (Guest_Model) modelObservable;
+			String birthdate = null;
+			if (model.getBirthdate() != null) {
+				birthdate = dateFormat.format(model.getBirthdate());
+			}
 			if (currentMode != this.MODE_CREATE) {
 				lbl_headline.setText(model.toString());
 				tf_firstName.setText(model.getFirstName());
 				tf_lastName.setText(model.getLastName());
-				tf_birthdate.setText(model.getBirthdate() + "");
+				tf_birthdate.setText(birthdate);
+				if (model.getPhonenumber().isBeginningWithPlusSign()) {
+					tf_phonenumber.setText("+"
+							+ model.getPhonenumber().getCountry() + ""
+							+ model.getPhonenumber().getNationalNumber());
+				} else {
+					tf_phonenumber.setText(model.getPhonenumber().getCountry()
+							+ "" + model.getPhonenumber().getNationalNumber());
+				}
 				tf_streetName.setText(model.getAdress().getStreetName());
 				tf_houseNo.setText(model.getAdress().getHouseNumber());
 				tf_city.setText(model.getAdress().getCity());

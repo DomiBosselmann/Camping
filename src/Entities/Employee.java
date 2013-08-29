@@ -1,14 +1,25 @@
-package Entities;
+package entities;
 
 public abstract class Employee extends Person {
+	
+	public static final int TECHNICAL = 0, RECEPTION = 1, ADMIN = 2;
 
-	private long personnelId;
-	private JobTitle jobTitle;
-	private String insuranceNumber;
-	private String password;
+	protected long personnelId;
+	protected JobTitle jobTitle;
+	protected String insuranceNumber;
+	protected String password;
 
 	public Employee() {
 		super();
+	}
+
+	public Employee(long personnelId, JobTitle jobTitle,
+			String insuranceNumber, String password) {
+		super();
+		this.personnelId = personnelId;
+		this.jobTitle = jobTitle;
+		this.insuranceNumber = insuranceNumber;
+		this.password = password;
 	}
 
 	public long getPersonnelId() {
@@ -42,6 +53,11 @@ public abstract class Employee extends Person {
 	public void setInsuranceNumber(String insuranceNumber) {
 		this.insuranceNumber = insuranceNumber;
 	}
-	
+
+	@Override
+	public String toString() {
+		return getFirstName() + " " + getLastName() + "( #" + this.personnelId
+				+ ")";
+	}
 
 }

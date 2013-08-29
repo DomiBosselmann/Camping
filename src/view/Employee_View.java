@@ -11,13 +11,14 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.List;
 import java.util.Observable;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -29,35 +30,48 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 
 import model.Employee_Model;
-import Entities.Address;
-import Entities.AdminEmployee;
-import Entities.IdentityCard;
-import Entities.JobTitle;
-import Entities.ReceptionEmployee;
-import Entities.TechnicalEmployee;
+
+import org.joda.time.LocalDate;
+
+import Util.ApplicationCore;
+
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber.CountryCodeSource;
+
+import entities.Address;
+import entities.AdminEmployee;
+import entities.Employee;
+import entities.IdentityCard;
+import entities.JobTitle;
+import entities.Phonenumber;
+import entities.ReceptionEmployee;
+import entities.TechnicalEmployee;
 
 public class Employee_View extends JFrame implements ViewForm_Intf {
 
 	private int currentMode;
 
-	private DateFormat dateFormat = new SimpleDateFormat("dd.mm.yyyy");
+	private DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
 	private JLabel lbl_firstName, lbl_lastName, lbl_jobTitle, lbl_streetName,
-			lbl_houseNo, lbl_City, lbl_zipCode, lbl_password,
+			lbl_phonenumber, lbl_houseNo, lbl_City, lbl_zipCode, lbl_password,
 			lbl_insuranceNumber, lbl_country, lbl_birthdate, lbl_IdNumber,
 			lbl_headline, lbl_orgUnit;
-	private JTextField tf_firstName, tf_lastName, tf_jobTitle, tf_streetName,
-			tf_orgUnit, tf_houseNo, tf_city, tf_country, tf_IdNumber,
-			tf_insuranceNumber;
+	private JTextField tf_firstName, tf_lastName, tf_streetName,
+			tf_phonenumber, tf_orgUnit, tf_houseNo, tf_city, tf_country,
+			tf_IdNumber, tf_insuranceNumber;
 	private JFormattedTextField tf_zipCode, tf_birthdate;
 	private JPasswordField pf_password;
+	private JComboBox dd_jobTitle;
 	private JButton btn_exec, btn_delete;
 	private JToggleButton btn_modify;
 
 	public Employee_View() {
 		super();
 		init();
-		this.setSize(420, 400);
+		this.setSize(420, 420);
 		this.setVisible(true);
 	}
 
@@ -86,7 +100,7 @@ public class Employee_View extends JFrame implements ViewForm_Intf {
 			tf_insuranceNumber.setEditable(false);
 			tf_firstName.setEditable(false);
 			tf_lastName.setEditable(false);
-			tf_jobTitle.setEditable(false);
+			tf_phonenumber.setEditable(false);
 			tf_streetName.setEditable(false);
 			tf_houseNo.setEditable(false);
 			tf_city.setEditable(false);
@@ -110,7 +124,7 @@ public class Employee_View extends JFrame implements ViewForm_Intf {
 			tf_insuranceNumber.setEditable(true);
 			tf_firstName.setEditable(true);
 			tf_lastName.setEditable(true);
-			tf_jobTitle.setEditable(true);
+			tf_phonenumber.setEditable(true);
 			tf_streetName.setEditable(true);
 			tf_houseNo.setEditable(true);
 			tf_city.setEditable(true);
@@ -132,7 +146,7 @@ public class Employee_View extends JFrame implements ViewForm_Intf {
 			tf_insuranceNumber.setEditable(true);
 			tf_orgUnit.setEditable(false);
 			tf_lastName.setEditable(true);
-			tf_jobTitle.setEditable(true);
+			tf_phonenumber.setEditable(true);
 			tf_streetName.setEditable(true);
 			tf_houseNo.setEditable(true);
 			tf_city.setEditable(true);
@@ -171,6 +185,7 @@ public class Employee_View extends JFrame implements ViewForm_Intf {
 		lbl_lastName = new JLabel("Nachname:");
 		lbl_jobTitle = new JLabel("Berufsbezeichnung:");
 		lbl_insuranceNumber = new JLabel("Sozialversicherungsnummer:");
+		lbl_phonenumber = new JLabel("Telefonnummer:");
 		lbl_streetName = new JLabel("Straße:");
 		lbl_houseNo = new JLabel("Hausnummer:");
 		lbl_orgUnit = new JLabel("Organisationseinheit:");
@@ -183,7 +198,7 @@ public class Employee_View extends JFrame implements ViewForm_Intf {
 		lbl_headline = new JLabel();
 		tf_firstName = new JTextField();
 		tf_lastName = new JTextField();
-		tf_jobTitle = new JTextField();
+		dd_jobTitle = new JComboBox();
 		tf_insuranceNumber = new JTextField();
 		tf_orgUnit = new JTextField();
 		tf_streetName = new JTextField();
@@ -193,6 +208,7 @@ public class Employee_View extends JFrame implements ViewForm_Intf {
 		pf_password = new JPasswordField();
 		tf_country = new JTextField();
 		tf_birthdate = new JFormattedTextField(dateFormat);
+		tf_phonenumber = new JTextField();
 		tf_IdNumber = new JTextField();
 		btn_exec = new JButton();
 		btn_delete = new JButton("Mitarbeiter löschen");
@@ -203,9 +219,10 @@ public class Employee_View extends JFrame implements ViewForm_Intf {
 		lbl_headline.setFont(new Font(curFont.getFontName(),
 				curFont.getStyle(), 20));
 		lbl_headline.setHorizontalAlignment(SwingConstants.CENTER);
-		btn_modify.setMnemonic(KeyEvent.VK_M);
-		btn_delete.setMnemonic(KeyEvent.VK_D);
+		btn_modify.setMnemonic(KeyEvent.VK_E);
+		btn_delete.setMnemonic(KeyEvent.VK_L);
 		btn_exec.setMnemonic(KeyEvent.VK_S);
+		dd_jobTitle.setEditable(false);
 
 		// map the controls to the panels
 		categoryHeader.add(btn_delete);
@@ -217,7 +234,7 @@ public class Employee_View extends JFrame implements ViewForm_Intf {
 		categoryJob.add(lbl_orgUnit);
 		categoryJob.add(tf_orgUnit);
 		categoryJob.add(lbl_jobTitle);
-		categoryJob.add(tf_jobTitle);
+		categoryJob.add(dd_jobTitle);
 
 		centerPanel.add(categoryJob);
 		centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
@@ -238,14 +255,16 @@ public class Employee_View extends JFrame implements ViewForm_Intf {
 		categoryPerson.add(tf_lastName);
 		categoryPerson.add(lbl_birthdate);
 		categoryPerson.add(tf_birthdate);
+		categoryPerson.add(lbl_phonenumber);
+		categoryPerson.add(tf_phonenumber);
 		categoryPerson.add(lbl_streetName);
 		categoryPerson.add(tf_streetName);
 		categoryPerson.add(lbl_houseNo);
 		categoryPerson.add(tf_houseNo);
-		categoryPerson.add(lbl_City);
-		categoryPerson.add(tf_city);
 		categoryPerson.add(lbl_zipCode);
 		categoryPerson.add(tf_zipCode);
+		categoryPerson.add(lbl_City);
+		categoryPerson.add(tf_city);
 		categoryPerson.add(lbl_password);
 		categoryPerson.add(pf_password);
 
@@ -258,8 +277,7 @@ public class Employee_View extends JFrame implements ViewForm_Intf {
 	}
 
 	public JobTitle getJobTitle() {
-		String ret = tf_jobTitle.getText();
-		return (ret.equals("")) ? null : new JobTitle(ret);
+		return (JobTitle) dd_jobTitle.getSelectedItem();
 	}
 
 	public String getPassword() {
@@ -296,6 +314,27 @@ public class Employee_View extends JFrame implements ViewForm_Intf {
 				: new IdentityCard(IdNum, country);
 	}
 
+	public Phonenumber getPhonenumber() {
+		Phonenumber myNumber = null;
+		PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+
+		try {
+			PhoneNumber number = phoneUtil
+					.parse(tf_phonenumber.getText(), "DE");
+			myNumber = new Phonenumber();
+			myNumber.setCountry(number.getCountryCode());
+			myNumber.setNationalNumber(number.getNationalNumber());
+			if (number.getCountryCodeSource().equals(
+					CountryCodeSource.FROM_NUMBER_WITH_PLUS_SIGN)) {
+				myNumber.setBeginningWithPlusSign(true);
+			}
+		} catch (NumberParseException e) {
+			System.err.println("NumberParseException was thrown: "
+					+ e.toString());
+		}
+		return myNumber;
+	}
+
 	public String getFirstName() {
 		String ret = tf_firstName.getText();
 		return (ret.equals("")) ? null : ret;
@@ -306,10 +345,10 @@ public class Employee_View extends JFrame implements ViewForm_Intf {
 		return (ret.equals("")) ? null : ret;
 	}
 
-	public Date getBirthdate() {
+	public LocalDate getBirthdate() {
 		String date = tf_birthdate.getText();
 		try {
-			return dateFormat.parse(date);
+			return new LocalDate(dateFormat.parse(date));
 		} catch (ParseException e) {
 			return null;
 		}
@@ -352,20 +391,32 @@ public class Employee_View extends JFrame implements ViewForm_Intf {
 		default:
 			throw new RuntimeException("Undefined integer value");
 		}
-		// TODO JDialog dialog = new JDialog(XY);
 	}
 
 	@Override
 	public void update(Observable modelObservable, Object arg) {
 		if (modelObservable instanceof Employee_Model) {
 			Employee_Model model = (Employee_Model) modelObservable;
+
+			String birthdate = null;
+			if (model.getBirthdate() != null) {
+				birthdate = dateFormat.format(model.getBirthdate());
+			}
 			if (currentMode != this.MODE_CREATE) {
 				lbl_headline.setText(model.toString());
 				tf_firstName.setText(model.getFirstName());
 				tf_lastName.setText(model.getLastName());
-				tf_jobTitle.setText(model.getJobTitle().getName());
 				pf_password.setText(model.getPassword());
-				tf_birthdate.setText(model.getBirthdate() + "");
+				tf_birthdate.setText(birthdate);
+				if (model.getPhonenumber().isBeginningWithPlusSign()) {
+					tf_phonenumber.setText("+"
+							+ model.getPhonenumber().getCountry() + ""
+							+ model.getPhonenumber().getNationalNumber());
+				} else {
+					tf_phonenumber.setText(model.getPhonenumber().getCountry()
+							+ "" + model.getPhonenumber().getNationalNumber());
+				}
+
 				tf_streetName.setText(model.getAdress().getStreetName());
 				tf_houseNo.setText(model.getAdress().getHouseNumber());
 				tf_city.setText(model.getAdress().getCity());
@@ -374,13 +425,24 @@ public class Employee_View extends JFrame implements ViewForm_Intf {
 				tf_IdNumber.setText(model.getId().getId());
 				tf_insuranceNumber.setText(model.getInsuranceNumber());
 			}
+			int type = 0;
 			if (model.getEmployee() instanceof ReceptionEmployee) {
 				tf_orgUnit.setText("Empfang");
+				type = Employee.RECEPTION;
 			} else if (model.getEmployee() instanceof TechnicalEmployee) {
 				tf_orgUnit.setText("Technik");
+				type = Employee.TECHNICAL;
 			} else if (model.getEmployee() instanceof AdminEmployee) {
 				tf_orgUnit.setText("Administration");
+				type = Employee.ADMIN;
 			}
+			List<JobTitle> possibleJobTitles = ApplicationCore.provider
+					.getJobTitles(type);
+			// new object, because that's the only easy way to set an array as
+			// model
+			DefaultComboBoxModel jobTitles = new DefaultComboBoxModel(
+					possibleJobTitles.toArray());
+			dd_jobTitle.setModel(jobTitles);
 		} else {
 			throw new RuntimeException("Undefined model instance");
 		}

@@ -1,15 +1,18 @@
-package Entities;
+package entities;
 
+import java.util.ArrayList;
 import java.util.Date;
+
+import org.joda.time.LocalDate;
 
 public class Effort {
 	
 	private long id;
 	private String desc;
-	private String prio;
-	private JobTitle responsibility;
+	private Effort_Prio prio;
+	private ArrayList<JobTitle> responsibility;
 	private int timeCycle;
-	private Date lastProcedure;
+	private LocalDate lastProcedure;
 	
 	public Effort() {
 		super();
@@ -31,19 +34,19 @@ public class Effort {
 		this.desc = desc;
 	}
 
-	public String getPrio() {
+	public Effort_Prio getPrio() {
 		return prio;
 	}
 
-	public void setPrio(String prio) {
+	public void setPrio(Effort_Prio prio) {
 		this.prio = prio;
 	}
 
-	public JobTitle getResponsibility() {
+	public ArrayList<JobTitle> getResponsibility() {
 		return responsibility;
 	}
 
-	public void setResponsibility(JobTitle responsibility) {
+	public void setResponsibility(ArrayList<JobTitle> responsibility) {
 		this.responsibility = responsibility;
 	}
 
@@ -55,11 +58,11 @@ public class Effort {
 		this.timeCycle = timeCycle;
 	}
 
-	public Date getLastProcedure() {
+	public LocalDate getLastProcedure() {
 		return lastProcedure;
 	}
 
-	public void setLastProcedure(Date lastProcedure) {
+	public void setLastProcedure(LocalDate lastProcedure) {
 		this.lastProcedure = lastProcedure;
 	}
 }

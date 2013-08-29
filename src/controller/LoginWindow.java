@@ -2,7 +2,6 @@ package controller;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -12,7 +11,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 public class LoginWindow extends JFrame {
 
@@ -22,10 +22,25 @@ public class LoginWindow extends JFrame {
 	private final int fieldLength = 15;
 
 	public static void main(String[] args) {
+
+		try {
+			// Set cross-platform Java L&F (also called "Metal")
+			UIManager.setLookAndFeel(UIManager
+					.getCrossPlatformLookAndFeelClassName());
+		} catch (UnsupportedLookAndFeelException e) {
+			// handle exception
+		} catch (ClassNotFoundException e) {
+			// handle exception
+		} catch (InstantiationException e) {
+			// handle exception
+		} catch (IllegalAccessException e) {
+			// handle exception
+		}
+
 		new LoginWindow();
 	}
 
-	public LoginWindow(){
+	public LoginWindow() {
 		super("LogIn Window");
 		init();
 		// Display the window.
@@ -83,14 +98,13 @@ public class LoginWindow extends JFrame {
 	}
 
 	private void performLogin() {
-		// TODO validate password and call next window
 		String user = tf_user.getText();
-		if(user.equalsIgnoreCase("Empfang")){
+		if (user.equalsIgnoreCase("Empfang")) {
 			new ReceptionStartWindow();
 		} else {
 			new TechnicalStartWindow();
 		}
-		
+
 		this.dispose();
 
 	}

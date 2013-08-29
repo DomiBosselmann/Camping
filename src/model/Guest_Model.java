@@ -1,11 +1,14 @@
 package model;
 
-import java.util.Date;
 import java.util.Observable;
 
-import Entities.Address;
-import Entities.Guest;
-import Entities.IdentityCard;
+import org.joda.time.LocalDate;
+
+import entities.Address;
+import entities.Guest;
+import entities.IdentityCard;
+import entities.Phonenumber;
+
 
 public class Guest_Model extends Observable {
 
@@ -17,12 +20,12 @@ public class Guest_Model extends Observable {
 
 	public void setGuest(Guest guest) {
 		this.guest = guest;
-		this.hasChanged();
+		this.setChanged();
 	}
 
 	public void setCustomerNumber(long customerNumber) {
 		guest.setCustomerId(customerNumber);
-		this.hasChanged();
+		this.setChanged();
 	}
 
 	public Address getAdress() {
@@ -31,7 +34,7 @@ public class Guest_Model extends Observable {
 
 	public void setAddress(Address adress) {
 		guest.setAddress(adress);
-		this.hasChanged();
+		this.setChanged();
 	}
 
 	public IdentityCard getId() {
@@ -40,7 +43,7 @@ public class Guest_Model extends Observable {
 
 	public void setId(IdentityCard id) {
 		guest.getId();
-		this.hasChanged();
+		this.setChanged();
 	}
 
 	public String getFirstName() {
@@ -49,7 +52,7 @@ public class Guest_Model extends Observable {
 
 	public void setFirstName(String firstName) {
 		guest.setFirstName(firstName);
-		this.hasChanged();
+		this.setChanged();
 	}
 
 	public String getLastName() {
@@ -58,22 +61,29 @@ public class Guest_Model extends Observable {
 
 	public void setLastName(String lastName) {
 		guest.setLastName(lastName);
-		this.hasChanged();
+		this.setChanged();
 	}
 
-	public Date getBirthdate() {
+	public LocalDate getBirthdate() {
 		return guest.getDateOfBirth();
 	}
 
-	public void setBirthdate(Date birthdate) {
+	public void setBirthdate(LocalDate birthdate) {
 		guest.setDateOfBirth(birthdate);
-		this.hasChanged();
+		this.setChanged();
+	}
+	
+	public Phonenumber getPhonenumber() {
+		return guest.getPhonenumber();
+	}
+
+	public void setPhonenumber(Phonenumber phonenumber) {
+		guest.setPhonenumber(phonenumber);
 	}
 
 	@Override
 	public String toString() {
-		return getFirstName() + " " + getLastName() + "( #"
-				+ this.getCustomerNumber() + ")";
+		return guest.toString();
 	}
 
 }

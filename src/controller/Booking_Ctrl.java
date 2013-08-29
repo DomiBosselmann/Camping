@@ -5,16 +5,22 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
-import java.util.Date;
 
 import javax.swing.JComponent;
 
 import model.Booking_Model;
+
+import org.joda.time.LocalDate;
+
+import entities.Booking;
+import entities.Booking_Status;
+import entities.Guest;
+import entities.Pitch;
+import entities.Reservation;
+
+import Util.ApplicationCore;
+
 import view.Booking_View;
-import Entities.Booking;
-import Entities.Booking_Status;
-import Entities.Guest;
-import Entities.Reservation;
 
 public class Booking_Ctrl extends JComponent {
 
@@ -30,6 +36,14 @@ public class Booking_Ctrl extends JComponent {
 		model.setBooking(new Booking());
 		init(Booking_View.MODE_CREATE);
 		view.addConfirmationtionListener(new CreateListener());
+	}
+
+	public void createNewBookingFromTemplate(ArrayList<Pitch> pitches,
+			LocalDate startDate, LocalDate finishDate) {
+		model.setBooking(new Booking());
+		init(Booking_View.MODE_CREATE);
+		view.addConfirmationtionListener(new CreateListener());
+		view.setTemplate(pitches, startDate, finishDate);
 	}
 
 	public void modifyBooking(Booking entity) {
@@ -48,8 +62,6 @@ public class Booking_Ctrl extends JComponent {
 	}
 
 	private void init(int mode) {
-		// TODO Change to real JPA access
-
 		view = new Booking_View();
 		view.changeMode(mode);
 		model.addObserver(view);
@@ -61,22 +73,31 @@ public class Booking_Ctrl extends JComponent {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 
+			// read the view
 			boolean taskGenerating = view.isTaskGenerating();
-			ArrayList<Reservation> reservations = view.getReservations();
-			Date startDate = view.getStartDate();
-			Date finishDate = view.getFinishDate();
+			LocalDate startDate = view.getStartDate();
+			LocalDate finishDate = view.getFinishDate();
+			ArrayList<Pitch> freePitches = (ArrayList<Pitch>) ApplicationCore.provider
+					.getFreePitchesFromTo(startDate, finishDate);
 			Guest guest = view.getGuest();
 			Booking_Status status = view.getStatus();
+			
+			if (freePitches.containsAll(view.getPitches())) {
+				for (Pitch pitch : view.getPitches()) {
+					model.addReservation(startDate, finishDate, pitch);
+				}
+			} else {
+				return;
+			}
 
-			// if one or more values aren't set
-			if (reservations == null || startDate == null || finishDate == null
-					|| guest == null || status == null
-					|| reservations.size() == 0 || startDate.after(finishDate)) {
+			// value validation
+			if (startDate == null || finishDate == null || guest == null
+					|| status == null || startDate.isAfter(finishDate)
+					|| !(status.equals(Booking_Status.Reserved))) {
 				return;
 			}
 			System.out.println("Create action triggered");
 			model.setTaskGenerating(taskGenerating);
-			model.setReservations(reservations);
 			model.setStartDate(startDate);
 			model.setFinishDate(finishDate);
 			model.setGuest(guest);
@@ -93,21 +114,28 @@ public class Booking_Ctrl extends JComponent {
 		public void actionPerformed(ActionEvent arg0) {
 
 			boolean taskGenerating = view.isTaskGenerating();
-			ArrayList<Reservation> reservations = view.getReservations();
-			Date startDate = view.getStartDate();
-			Date finishDate = view.getFinishDate();
+			LocalDate startDate = view.getStartDate();
+			LocalDate finishDate = view.getFinishDate();
+			ArrayList<Pitch> freePitches = (ArrayList<Pitch>) ApplicationCore.provider
+					.getFreePitchesFromTo(startDate, finishDate);
 			Guest guest = view.getGuest();
 			Booking_Status status = view.getStatus();
 
+			if (freePitches.containsAll(view.getPitches())) {
+				for (Pitch pitch : view.getPitches()) {
+					model.addReservation(startDate, finishDate, pitch);
+				}
+			} else {
+				return;
+			}
+
 			// if one or more values aren't set
-			if (reservations == null || startDate == null || finishDate == null
-					|| guest == null || status == null
-					|| reservations.size() == 0) {
+			if (startDate == null || finishDate == null || guest == null
+					|| status == null || status.equals(Booking_Status.Reserved)) {
 				return;
 			}
 			System.out.println("Create action triggered");
 			model.setTaskGenerating(taskGenerating);
-			model.setReservations(reservations);
 			model.setStartDate(startDate);
 			model.setFinishDate(finishDate);
 			model.setGuest(guest);

@@ -1,34 +1,36 @@
 package model;
 
-import java.util.Date;
 import java.util.Observable;
 
-import Entities.Address;
-import Entities.Employee;
-import Entities.IdentityCard;
-import Entities.JobTitle;
+import org.joda.time.LocalDate;
+
+import entities.Address;
+import entities.Employee;
+import entities.IdentityCard;
+import entities.JobTitle;
+import entities.Phonenumber;
+
 
 public class Employee_Model extends Observable {
 
 	private Employee employee;
 
-	public long getPersonnelNumber() {
+	public long getPersonnelId() {
 		return employee.getPersonnelId();
 	}
 
 	public void setEmployee(Employee employee) {
 		this.employee = employee;
-		this.hasChanged();
+		this.setChanged();
 	}
-	
 
 	public Employee getEmployee() {
 		return employee;
 	}
 
-	public void setPersonnelNumber(long personnelNumber) {
+	public void setPersonnelId(long personnelNumber) {
 		employee.setPersonnelId(personnelNumber);
-		this.hasChanged();
+		this.setChanged();
 	}
 
 	public JobTitle getJobTitle() {
@@ -37,7 +39,7 @@ public class Employee_Model extends Observable {
 
 	public void setJobTitle(JobTitle jobTitle) {
 		employee.setJobTitle(jobTitle);
-		this.hasChanged();
+		this.setChanged();
 	}
 
 	public String getPassword() {
@@ -46,7 +48,7 @@ public class Employee_Model extends Observable {
 
 	public void setPassword(String password) {
 		employee.setPassword(password);
-		this.hasChanged();
+		this.setChanged();
 	}
 
 	public Address getAdress() {
@@ -55,7 +57,7 @@ public class Employee_Model extends Observable {
 
 	public void setAddress(Address adress) {
 		employee.setAddress(adress);
-		this.hasChanged();
+		this.setChanged();
 	}
 
 	public IdentityCard getId() {
@@ -64,7 +66,7 @@ public class Employee_Model extends Observable {
 
 	public void setId(IdentityCard id) {
 		employee.getId();
-		this.hasChanged();
+		this.setChanged();
 	}
 
 	public String getFirstName() {
@@ -73,7 +75,7 @@ public class Employee_Model extends Observable {
 
 	public void setFirstName(String firstName) {
 		employee.setFirstName(firstName);
-		this.hasChanged();
+		this.setChanged();
 	}
 
 	public String getLastName() {
@@ -82,16 +84,16 @@ public class Employee_Model extends Observable {
 
 	public void setLastName(String lastName) {
 		employee.setLastName(lastName);
-		this.hasChanged();
+		this.setChanged();
 	}
 
-	public Date getBirthdate() {
+	public LocalDate getBirthdate() {
 		return employee.getDateOfBirth();
 	}
 
-	public void setBirthdate(Date birthdate) {
+	public void setBirthdate(LocalDate birthdate) {
 		employee.setDateOfBirth(birthdate);
-		this.hasChanged();
+		this.setChanged();
 	}
 
 	public String getInsuranceNumber() {
@@ -100,13 +102,20 @@ public class Employee_Model extends Observable {
 
 	public void setInsuranceNumber(String insuranceNumber) {
 		employee.setInsuranceNumber(insuranceNumber);
-		this.hasChanged();
+		this.setChanged();
 	}
-	
+
+	public Phonenumber getPhonenumber() {
+		return employee.getPhonenumber();
+	}
+
+	public void setPhonenumber(Phonenumber phonenumber) {
+		employee.setPhonenumber(phonenumber);
+	}
+
 	@Override
 	public String toString() {
-		return getFirstName() + " " + getLastName() + "( #"
-				+ this.getPersonnelNumber() + ")";
+		return employee.toString();
 	}
 
 }
