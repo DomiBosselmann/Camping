@@ -88,7 +88,7 @@ public class Pitch extends Property {
 		return reservations.remove(reservation);
 	}
 
-	public Pitch_Status getStatusForPeriode(LocalDate start, LocalDate finsh) {
+	/*public Pitch_Status getStatusForPeriode(LocalDate start, LocalDate finsh) {
 		int numberDays = 0, numberInService = 0, numberBooked = 0;
 		// iterate over all days
 		for (LocalDate i = start; !(i.isAfter(finsh)); i = i.plusDays(1)) {
@@ -120,7 +120,45 @@ public class Pitch extends Property {
 		} else{
 			return Pitch_Status.NotAvailable;
 		}
-	}
+	}*/
+    
+    public Pitch_Status getStatusForPeriode (LocalDate startDate, LocalDate finishDate) {
+        Pitch_Status status;
+        
+        for (LocalDate date = startDate; date.isBefore(finishDate); date = date.plusDays(1)) {
+            if (status == null) {
+                status = getStatusForDate(date);
+            } else {
+                if (status != getStatusForDate()) {
+                    return Pitch_Status.NotAvailable;
+                }
+            }
+        }
+        
+        return status;
+    }
+    
+    private Pitch_Status getStatusForDate(LocalDate date) {
+        // check if the pitch for that day is booked
+        for (Reservation reservation : reservations) {
+            boolean isInBetween = (reservation.getStartDate().compareTo(date) * date
+                                   .compareTo(reservation.getFinishDate())) >= 0;
+            if (isInBetween) {
+                return Pitch_Status.Booked;
+            }
+        }
+        
+        // check if the pitch for that day is going to be in service
+        for (Task task : tasks) {
+            boolean isInBetween = (task.getStartDate().compareTo(date) * date
+                                   .compareTo(task.getFinishDate())) >= 0;
+            if (isInBetween) {
+                return Pitch_Status.Service;
+            }
+        }
+        
+        return Pitch_Status.Available;
+    }
 
 
 	public PitchGroup getGroup() {
@@ -132,26 +170,41 @@ public class Pitch extends Property {
 	}
 
 	public float calcPrice(LocalDate startDate, LocalDate finishDate) {
-		LocalDate referenceYear = new LocalDate();
-		LocalDate seasonStart = new LocalDate(referenceYear.getYear(), 5, 1);
-		LocalDate seasonEnd = new LocalDate(referenceYear.getYear(), 9, 15);
-
-		boolean isInBetween = (seasonStart.compareTo(startDate) * startDate
-				.compareTo(seasonEnd)) >= 0;
-
-		float price = group.getPrice();
-
+        float price = 0;
+        
+		for (LocalDate date = startDate; date.isBefore(finishDate); date = date.plusDays(1)) {
+            price += calcPrice(date);
+        }
+        
+        return price;
+	}
+    
+    private float calcPrice(LocalDate date) {
+        
+        float price = group.getPrice();
+        
 		if (powerSupplied) {
 			price += 2.5f;
 		}
 		if (waterSupplied) {
 			price += 2.5f;
 		}
-		if (isInBetween) {
+		if (isInSeason(date)) {
 			price += 2f;
 		}
+        
 		return price;
-	}
+    }
+    
+    // Config Klasse!
+    private boolean isInSeason (LocalDate date) {
+        LocalDate referenceYear = new LocalDate();
+		LocalDate seasonStart = new LocalDate(referenceYear.getYear(), 5, 1);
+		LocalDate seasonEnd = new LocalDate(referenceYear.getYear(), 9, 15);
+                
+        return (seasonStart.compareTo(startDate) * startDate
+                .compareTo(seasonEnd)) >= 0;
+    }
 
 	@Override
 	public String toString() {
